@@ -1,4 +1,9 @@
+// import express
 const express = require('express');
+
+// import path (for combining front and back end servers- "serve up static assets")
+const path = require('path');
+
 // import ApolloServer
 const { ApolloServer } = require('apollo-server-express');
 
@@ -23,6 +28,17 @@ server.applyMiddleware({ app });
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+// Serve up static assets
+// if node is in production, instruct Express server to serve any files in the React app's build directory
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/build')));
+}
+
+// if we make a get request to any location without an explicit route, respond with the React front-end code
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+});
 
 db.once('open', () => {
   app.listen(PORT, () => {
